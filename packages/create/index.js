@@ -22,23 +22,22 @@ const ok = await confirm({
 });
 
 if (ok) {
-  await Promise.all([
-    cp(
-      `./templates/${template}`,
-      resolve(process.cwd(), path),
-      { recursive: true }
-    ),
-    writeFile(resolve(process.cwd(), path, 'package.json'), JSON.stringify({
-      name,
-      private: true,
-      scripts: {
-        start: 'gears-sdk index.js'
-      },
-      devDependencies: {
-        '@redis/gears-sdk': "file:../packages/sdk"
-      }
-    }, null, 2))
-  ]);
+  await cp(
+    `./templates/${template}`,
+    resolve(process.cwd(), path),
+    { recursive: true }
+  );
+
+  await writeFile(resolve(process.cwd(), path, 'package.json'), JSON.stringify({
+    name,
+    private: true,
+    scripts: {
+      start: 'gears-sdk index.js'
+    },
+    devDependencies: {
+      '@redis/gears-sdk': "file:../packages/sdk"
+    }
+  }, null, 2));
 
   console.log([
     `cd ${path}`,
