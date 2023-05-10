@@ -1,0 +1,7 @@
+{
+  "name": "@redis/gears-sdk-monorepo",
+  "private": true,
+  "workspaces": [
+    "./packages/*"
+  ]
+}

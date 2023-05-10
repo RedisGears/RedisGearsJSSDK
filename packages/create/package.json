@@ -1,0 +1,8 @@
+{
+  "name": "create-redis-gear",
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "@inquirer/prompts": "^1.0.3"
+  }
+}
