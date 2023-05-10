@@ -42,6 +42,6 @@ if (ok) {
   console.log([
     `cd ${path}`,
     'npm install',
-    'npm run dev'
+    'npm run start'
   ].join('\n'));
 }
