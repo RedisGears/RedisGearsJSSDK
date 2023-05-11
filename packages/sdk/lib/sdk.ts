@@ -13,6 +13,12 @@ interface StreamConsumerData {
   record_raw: Array<[ArrayBuffer, ArrayBuffer]>
 }
 
+interface NotificationsConsumerData {
+  event: string;
+  key: string;
+  key_raw: ArrayBuffer;
+}
+
 declare global {
   const redis: {
     register_function(
@@ -28,6 +34,12 @@ declare global {
       trim: boolean,
       fn: (client: NativeClient, data: StreamConsumerData) => unknown
     ): void;
+
+    register_notifications_consumer(
+      name: string,
+      prefix: string,
+      fn: (client: NativeClient, data: NotificationsConsumerData) => unknown
+    )
   };
 }
 
@@ -81,14 +93,26 @@ export function registerStreamConsumer(
   prefix: string,
   window: number,
   trim: boolean,
-  fn: (client: SdkClient, data: StreamConsumerData) => unknown
+  fn: (client: SdkClientType, data: StreamConsumerData) => unknown
 ): void {
   redis.register_stream_consumer(
     name,
     prefix,
     window,
     trim,
-    (client, data) => fn(new SdkClient(client), data)
+    (client, data) => fn(new SdkClient(client) as SdkClientType, data)
+  );
+}
+
+export function registerNotificationsConsumer(
+  name: string,
+  prefix: string,
+  fn: (client: SdkClientType, data: NotificationsConsumerData) => unknown
+) {
+  redis.register_notifications_consumer(
+    name,
+    prefix,
+    (client, data) => fn(new SdkClient(client) as SdkClientType, data)
   );
 }
 

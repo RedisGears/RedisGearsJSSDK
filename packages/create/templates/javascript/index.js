@@ -1,6 +1,6 @@
 #!js name=lib api_version=1.1
 
-import { registerFunction, registerStreamConsumer } from '@redis/gears-sdk';
+import { registerFunction, registerStreamConsumer, registerNotificationsConsumer } from '@redis/gears-sdk';
 
 registerFunction(
   'random',
@@ -16,5 +16,11 @@ registerStreamConsumer(
   'stream',
   1,
   false,
-  (client, { key }) => client.incr(`${key}:counter`)
+  (client, { stream_name }) => client.incr(`${stream_name}:stream-counter`)
+);
+
+registerNotificationsConsumer(
+  'consumer',
+  '',
+  (client, { key }) => client.incr(`${key}:notifications-counter`)
 );
