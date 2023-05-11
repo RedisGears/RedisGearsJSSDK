@@ -3,22 +3,22 @@ import { readdir, cp, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const name = await input({
-  message: 'Name',
+  message: 'Choose a name for your library',
   default: 'redis-gear'
 });
 
 const path = await input({
-  message: 'Path',
+  message: 'Where do you want to create it?',
   default: `../../${name}`
 });
 
 const template = await select({
-  message: 'Template',
+  message: 'Which template do you want to use?',
   choices: (await readdir('./templates')).map(value => ({ value }))
 });
 
 const ok = await confirm({
-  message: `Are you sure?`
+  message: 'Are you sure?'
 });
 
 if (ok) {
@@ -35,7 +35,7 @@ if (ok) {
       start: 'gears-sdk index.js'
     },
     devDependencies: {
-      '@redis/gears-sdk': "file:../packages/sdk"
+      '@redis/gears-sdk': 'file:../packages/sdk'
     }
   }, null, 2));
 

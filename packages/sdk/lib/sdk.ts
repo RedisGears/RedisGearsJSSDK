@@ -1,8 +1,16 @@
-import { CommandSignature } from '@redis/client/dist/lib/RESP/types.js';
+import { CommandReply, ReplyWithFlags } from '@redis/client/dist/lib/RESP/types.js';
 import COMMANDS from './commands.js';
 
 interface NativeClient {
   call<T = unknown>(...args: Array<string | ArrayBuffer>): T;
+}
+
+interface StreamConsumerData {
+  id: [ms: `${number}`, seq: `${number}`];
+  stream_name: string;
+  stream_name_raw: ArrayBuffer;
+  record: Array<[string, string]>;
+  record_raw: Array<[ArrayBuffer, ArrayBuffer]>
 }
 
 declare global {
@@ -12,12 +20,20 @@ declare global {
       // TODO: return type?
       fn: (client: NativeClient, ...args: Array<string> | Array<ArrayBuffer>) => unknown
     ): void;
+
+    register_stream_consumer(
+      name: string,
+      prefix: string,
+      window: number,
+      trim: boolean,
+      fn: (client: NativeClient, data: StreamConsumerData) => unknown
+    ): void;
   };
 }
 
 type WithCommands = {
   // TODO: flags?
-  [P in keyof typeof COMMANDS]: CommandSignature<typeof COMMANDS[P], 3, {}>;
+  [P in keyof typeof COMMANDS]: (...args: Parameters<typeof COMMANDS[P]['transformArguments']>) => ReplyWithFlags<CommandReply<typeof COMMANDS[P], 3>, {}>;
 };
 
 type SdkClientType = SdkClient & WithCommands;
@@ -57,6 +73,22 @@ export function registerFunction(
   redis.register_function(
     name,
     (client, ...args) => fn(new SdkClient(client) as SdkClientType, ...args)
+  );
+}
+
+export function registerStreamConsumer(
+  name: string,
+  prefix: string,
+  window: number,
+  trim: boolean,
+  fn: (client: SdkClient, data: StreamConsumerData) => unknown
+): void {
+  redis.register_stream_consumer(
+    name,
+    prefix,
+    window,
+    trim,
+    (client, data) => fn(new SdkClient(client), data)
   );
 }
 
