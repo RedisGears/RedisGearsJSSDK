@@ -5,6 +5,10 @@ interface NativeClient {
   call<T = unknown>(...args: Array<string | ArrayBuffer>): T;
 }
 
+interface NativeAsyncClient {
+  block<T>(fn: (client: NativeClient) => T): T;
+}
+
 interface StreamConsumerData {
   id: [ms: `${number}`, seq: `${number}`];
   stream_name: string;
@@ -25,6 +29,11 @@ declare global {
       name: string,
       // TODO: return type?
       fn: (client: NativeClient, ...args: Array<string> | Array<ArrayBuffer>) => unknown
+    ): void;
+
+    regiser_async_function(
+      name: string,
+      fn: (asyncClient: NativeAsyncClient) => unknown
     ): void;
 
     register_stream_consumer(
@@ -51,11 +60,8 @@ type WithCommands = {
 type SdkClientType = SdkClient & WithCommands;
 
 class SdkClient {
-  _client;
-
-  constructor(client) {
-    this._client = client;
-  }
+  // _client is in use...
+  constructor(private _client: NativeClient) {}
 }
 
 for (const [name, command] of Object.entries(COMMANDS)) {
@@ -78,6 +84,14 @@ for (const [name, command] of Object.entries(COMMANDS)) {
     };
 }
 
+class SdkAsyncClient {
+  constructor(private _client: NativeAsyncClient) {}
+
+  block<T>(fn: (client: SdkClientType) => T): T {
+    return this._client.block(client => fn(new SdkClient(client) as SdkClientType));
+  }
+}
+
 export function registerFunction(
   name: string,
   fn: (client: SdkClientType, ...args: Array<string> | Array<ArrayBuffer>) => unknown
@@ -85,6 +99,16 @@ export function registerFunction(
   redis.register_function(
     name,
     (client, ...args) => fn(new SdkClient(client) as SdkClientType, ...args)
+  );
+}
+
+export function registerAsyncFunction(
+  name: string,
+  fn: (client: SdkAsyncClient, ...args: Array<string> | Array<ArrayBuffer>) => unknown
+): void {
+  redis.regiser_async_function(
+    name,
+    (asyncClient, ...args) => fn(new SdkAsyncClient(asyncClient), ...args)
   );
 }
 
