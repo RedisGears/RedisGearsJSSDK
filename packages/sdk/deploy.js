@@ -69,7 +69,7 @@ async function watchAndDeploy(client, rollupOptions) {
 async function deploy(client, result) {
   try {
     const { output: [{ code }] } = await result.generate({ format: 'es' });
-    await client.sendCommand(['RG.FUNCTION', 'LOAD', 'UPGRADE', code]);
+    await client.sendCommand(['TFUNCTION', 'LOAD', 'REPLACE', code]);
     console.log('Deployed! :)');
   } catch (err) {
     console.error('Deploy error', err);
