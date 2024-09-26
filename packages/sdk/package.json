@@ -13,7 +13,7 @@
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-typescript": "^11.1.0",
     "commander": "^10.0.1",
-    "rollup": "^3.21.5",
+    "rollup": "^3.29.5",
     "rollup-plugin-preserve-shebangs": "^0.2.0",
     "tslib": "^2.5.0"
   },
